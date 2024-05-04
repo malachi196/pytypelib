@@ -3,6 +3,7 @@ from typing import (TypeVar, overload, MutableMapping, List,
 from collections import defaultdict
 from copy import deepcopy
 
+__all__ = ["PlaceMap"]
 
 K = TypeVar("K") #K (key or list type)
 V = TypeVar("V") #V (value or dict type)
