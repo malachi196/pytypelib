@@ -12,7 +12,7 @@ on:
       - "*"
 
 env:
-  PROJECT_NAME: config
+  PROJECT_NAME: pytypelib
 
 jobs:
   build:

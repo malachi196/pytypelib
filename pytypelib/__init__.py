@@ -1,5 +1,6 @@
-from ._pytypelib import __all__
+from ._pytypelib import PlaceMap, CacheList
 
 __all__=[
-    "PlaceMap"
+    "PlaceMap",
+    "CacheList",
 ]

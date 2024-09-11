@@ -1,6 +1,6 @@
 [project]
 name = "pytypelib"
-version = "0.1 Alpha"
+version = "0.1.4"
 authors = [
   { name="@malachi196", email="malachiaaronwilson@gmail.com" },
 ]
@@ -17,7 +17,7 @@ classifiers = [
 Homepage = "https://github.com/malachi196/pytypelib"
 [tool.poetry]
 name = "pytypelib"
-version = "0.1 Alpha"
+version = "0.1.4"
 description = "Some more helpful python types and objects"
 authors = ["malachi196"]
 license = "MIT"

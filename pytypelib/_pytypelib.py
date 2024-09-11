@@ -1,9 +1,7 @@
 from typing import (TypeVar, overload, MutableMapping, List,
     Dict, Any, Iterator, runtime_checkable, Protocol, final)
-from collections import defaultdict
+from collections import defaultdict, UserList
 from copy import deepcopy
-
-__all__ = ["PlaceMap"]
 
 K = TypeVar("K") #K (key or list type)
 V = TypeVar("V") #V (value or dict type)
@@ -30,6 +28,7 @@ class _ProtoMap(MutableMapping[K, V], _Proto):
     def __getattribute__(self, name: str) -> K: ...
     def __repr__(self) -> K: ...
 
+
 class PlaceMap(_ProtoMap[K, V]):
     """Create map of data that is given, in relation to keys and their placement\n
     if 'data' value is List, PlaceMap returns a dict:
@@ -49,18 +48,19 @@ class PlaceMap(_ProtoMap[K, V]):
     
     def __init__(self, data) -> Any:
         self._data: Dict|List = data
+        ty = type(data)
         if isinstance(data, List):
             self._fdat = defaultdict(lambda: None)
             self._final = {}
             self._cache = {} #cache section
             for key, val in enumerate(data):
                 self._fdat[key] = val
-                self._final = dict(self._fdat)
-                self._cache = dict(self._fdat)
+            self._final = dict(self._fdat)
+            self._cache = dict(self._fdat)
         elif isinstance(data, Dict): 
             self._fdat = []
             self._final = []
-            self._cache = []
+            self._cache = [] #cache section
             _k = []
             clone = deepcopy(data)
             for key, val in clone.items():
@@ -69,8 +69,9 @@ class PlaceMap(_ProtoMap[K, V]):
             for i in _k:
                 self._fdat.append(clone[i])
             self._final = list(self._fdat)
+            self._cache = list(self._fdat)
         else:
-            raise TypeError("'data' type can only be 'dict' or 'list'")
+            raise TypeError(f"'data' type can only be 'dict' or 'list', not {ty}")
 
     def __getitem__(self, key: K) -> V:
         return self._final[key]
@@ -82,8 +83,7 @@ class PlaceMap(_ProtoMap[K, V]):
         del self._final[key]
 
     def __iter__(self) -> Iterator[K]:
-        if isinstance(self._data, List):
-            return iter(dict(self._final))
+        return iter(self._final)
 
     def __len__(self) -> int:
         return len(self._final)
@@ -96,10 +96,7 @@ class PlaceMap(_ProtoMap[K, V]):
             return getattr(self._final, name)
         
     def __str__(self) -> str:
-        if isinstance(self._data, List):
-            return str(self._final)
-        elif isinstance(self._data, Dict):
-            return str(list(self._final))
+        return str(self._final)
     
     def __repr__(self) -> str:
         return repr(self._final)
@@ -122,10 +119,29 @@ class PlaceMap(_ProtoMap[K, V]):
             if isinstance(self._final, List):
                 self._final = self._cache
         elif isinstance(self._data, Dict):
-            pass # add dict version here
+            if isinstance(self._final, Dict):
+                self._final = self._cache
     
     @final
     @property
     def get_remap(self) -> V:
         """returns remap value without performing remap on original data"""
         return self._cache
+
+class CacheList(UserList, List):
+    """Least Recently Used cache list that auto-deletes items that exceed the maxsize"""
+    def __init__(self, maxsize: int = 3) -> None:
+        super().__init__()
+        self._maxsize = maxsize
+    
+    def append(self, item: V) -> None:
+        if len(self.data) >= self._maxsize:
+            self.data.pop(0)
+        self.data.append(item)
+
+    def __getitem__(self, key: K) -> V:
+        return self.data[key]
+    
+    def __setitem__(self, key: K, value: V) -> None:
+        self.data[key] = value
+
